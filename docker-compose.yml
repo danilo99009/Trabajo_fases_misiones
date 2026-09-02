@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  flask-api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: flask-api
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: 3306
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+    # No exponemos el puerto directamente al host: Nginx Proxy Manager
+    # se conectará a este contenedor por la red interna 'app-network'.
+    expose:
+      - "5000"
+
+  mysql:
+    image: mysql:8.0
+    container_name: servidor-bd-ejemplo
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+    # Puerto expuesto SOLO en la red interna del host (para el monitor TCP de Uptime Kuma
+    # en Fase 3). Si no necesitas acceso externo a MySQL, quita este bloque "ports".
+    ports:
+      - "127.0.0.1:3306:3306"
+
+networks:
+  app-network:
+    driver: bridge
+    # Nginx Proxy Manager, Uptime Kuma y Dozzle (Fase 3) deben conectarse
+    # a esta misma red externa para poder alcanzar flask-api y mysql.
+    name: app-network
+
+volumes:
+  mysql-data:
