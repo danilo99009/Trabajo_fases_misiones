@@ -7,7 +7,7 @@ app = Flask(__name__)
 # Config de BD leída SIEMPRE desde variables de entorno (nunca hardcodeada).
 DB_HOST = os.environ.get("DB_HOST", "mysql")
 DB_USER = os.environ.get("DB_USER", "app_user")
-DB_PASSWORD = "SuperSecreta123"  # obligatorio, sin default
+DB_PASSWORD = os.environ.get("DB_PASSWORD")   # obligatorio, sin default
 DB_NAME = os.environ.get("DB_NAME", "app_db")
 DB_PORT = int(os.environ.get("DB_PORT", 3306))
 
