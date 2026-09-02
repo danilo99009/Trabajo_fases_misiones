@@ -22,9 +22,9 @@ jobs:
       - name: Instalar Bandit
         run: pip install bandit
 
-      - name: Ejecutar Bandit 
+      - name: Ejecutar Bandit (falla si hay severidad media o alta)
         working-directory: ./app
-        run: bandit -r . -ll -x ./test_app.py
+        run: bandit -r . -l -x ./test_app.py
 
   container-scan-trivy:
     name: Container Scan - Trivy
@@ -36,7 +36,7 @@ jobs:
       - name: Construir imagen para escanear
         run: docker build -t flask-api:scan ./app
 
-      - name: Ejecutar Trivy 
+      - name: Ejecutar Trivy (falla si hay CRITICAL/HIGH)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: flask-api:scan
