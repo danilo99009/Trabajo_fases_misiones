@@ -24,7 +24,7 @@ jobs:
 
       - name: Ejecutar Bandit (falla si hay severidad media o alta)
         working-directory: ./app
-        run: bandit -r . -ll -x ./test_app.py
+        run: bandit -r . -l -x ./test_app.py
 
   container-scan-trivy:
     name: Container Scan - Trivy
