@@ -7,8 +7,46 @@ on:
     branches: [main]
 
 jobs:
+  sast-bandit:
+    name: SAST - Bandit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar Bandit
+        run: pip install bandit
+
+      - name: Ejecutar Bandit 
+        working-directory: ./app
+        run: bandit -r . -ll -x ./test_app.py
+
+  container-scan-trivy:
+    name: Container Scan - Trivy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Construir imagen para escanear
+        run: docker build -t flask-api:scan ./app
+
+      - name: Ejecutar Trivy 
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: flask-api:scan
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+          ignore-unfixed: true
+
   test:
     name: Pruebas unitarias (Pytest)
+    needs: [sast-bandit, container-scan-trivy]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout del código
