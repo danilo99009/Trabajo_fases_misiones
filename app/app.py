@@ -53,4 +53,7 @@ def db_check():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    # nosec B104: bind a 0.0.0.0 es necesario dentro del contenedor Docker
+    # para que el servicio sea alcanzable desde fuera; en producción real
+    # este bloque no se ejecuta (se usa gunicorn, ver Dockerfile CMD).
+    app.run(host="0.0.0.0", port=5000)  # nosec B104
